@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>কারুশিল্প  নকশা</title>
+  <!-- Importing the p5.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+  <style>
+    /* Basic CSS to ensure the canvas fills the page without margins or scrollbars */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevents scrollbars from appearing */
+      background-color: #111; /* Dark background for the page */
+      font-family: 'Inter', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    canvas {
+      display: block; /* Removes default canvas spacing */
+      max-width: 100vw;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+    /* Styling for the instruction overlay */
+    .instructions {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: center;
+      user-select: none;
+    }
+    /* Styling for the download button */
+    #downloadBtn {
+      margin-top: 10px;
+      padding: 8px 18px;
+      background-color: #3b82f6;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    #downloadBtn:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+    <h1>কারুশিল্প  নকশা</h1>
+  <!-- Instructions will be displayed on top of the canvas -->
+  <div class="instructions">
+    Hold down the mouse to draw | Press 'C' to clear | Press 'S' to save your creation
+  </div>
+
+  <script>
+    // --- Global Variables ---
+    const symmetry = 6; // The number of points of symmetry. Try changing this value!
+    const angle = 360 / symmetry; // The angle between each symmetrical line
+    let hueValue = 0; // Initial hue for the color cycle
+
+    /**
+     * The p5.js setup function runs once when the program starts.
+     * It's used to define initial environment properties.
+     */
+    function setup() {
+      createCanvas(windowWidth, windowHeight * 0.8); // Create a canvas that fills most of the window height
+      angleMode(DEGREES); // Set the angle mode to degrees for easier rotation
+      background(17, 17, 17); // Set a dark background color (#111111)
+      colorMode(HSB, 360, 100, 100); // Switch to HSB color mode for easy color cycling
+      strokeWeight(4); // Set the line thickness
+
+      // Create and add a Download button below the canvas
+      const btn = createButton('Download Image');
+      btn.id('downloadBtn');
+      btn.parent(document.body);
+      btn.mousePressed(downloadImage);
+    }
+
+    /**
+     * The p5.js draw function runs continuously in a loop.
+     * This is where all the drawing and animation happens.
+     */
+    function draw() {
+      // Translate the origin point (0,0) to the center of the canvas
+      // This makes all rotations happen around the center, which is key for the kaleidoscope effect
+      translate(width / 2, height / 2);
+
+      // We only want to draw when the mouse is pressed
+      if (mouseIsPressed) {
+        // Calculate the mouse position relative to the new centered origin
+        const mx = mouseX - width / 2;
+        const my = mouseY - height / 2;
+        // Calculate the previous mouse position relative to the new centered origin
+        const pmx = pmouseX - width / 2;
+        const pmy = pmouseY - height / 2;
+
+        // Update the hue value to create a rainbow effect over time
+        hueValue += 1;
+        if (hueValue > 360) {
+          hueValue = 0; // Loop back to the start of the color wheel
+        }
+
+        // Set the stroke color using the cycling hue value
+        stroke(hueValue, 80, 100);
+
+        // This is the core of the kaleidoscope effect. We loop through each 'slice' of the pie.
+        for (let i = 0; i < symmetry; i++) {
+          push(); // Save the current drawing state (translation, rotation)
+
+          rotate(i * angle); // Rotate the canvas for the current slice
+
+          // Draw the primary line based on mouse movement
+          line(mx, my, pmx, pmy);
+
+          // Create the mirrored reflection within the same slice
+          push(); // Save the state again for the mirror effect
+          scale(1, -1); // Flip the y-axis to create a mirror image
+          line(mx, my, pmx, pmy); // Draw the mirrored line
+          pop(); // Restore the state before the mirror flip
+
+          pop(); // Restore the state before the rotation
+        }
+      }
+    }
+
+    /**
+     * p5.js function that is called whenever a key is pressed.
+     */
+    function keyPressed() {
+      // If the 'c' or 'C' key is pressed, clear the canvas
+      if (key === 'c' || key === 'C') {
+        background(17, 17, 17); // Redraw the background to clear previous drawings
+      }
+      // If the 's' or 'S' key is pressed, save the canvas as a PNG file
+      if (key === 's' || key === 'S') {
+        saveCanvas('কারুশিল্প_নকশা', 'png');
+      }
+    }
+
+    /**
+     * p5.js function that is called when the window is resized.
+     * This ensures the canvas always fits the screen.
+     */
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight * 0.8);
+      background(17, 17, 17); // Clear and redraw the background on resize
+    }
+
+    /**
+     * Custom function to download the canvas image
+     */
+    function downloadImage() {
+      saveCanvas('কারুশিল্প_নকশা', 'png');
+    }
+  </script>
+</body>
+</html>
